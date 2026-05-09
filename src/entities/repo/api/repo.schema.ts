@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { userSummarySchema } from '@/entities/user/api/user.schema';
+import { userSummarySchema } from '@/shared/api/schemas/userSummary.schema';
 
 const licenseSchema = z
   .object({
@@ -17,7 +17,7 @@ export const repoSchema = z.object({
   name: z.string(),
   html_url: z.string().url(),
   description: z.string().nullable(),
-  languages: z.string().nullable(),
+  language: z.string().nullable(),
   watchers_count: z.number(),
   stargazers_count: z.number(),
   created_at: z

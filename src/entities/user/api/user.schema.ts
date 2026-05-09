@@ -1,12 +1,5 @@
 import { z } from 'zod';
-
-export const userSummarySchema = z.object({
-  login: z.string(),
-  id: z.number(),
-  avatar_url: z.string().url(),
-  html_url: z.string().url(),
-  type: z.enum(['User', 'Organization', 'Bot']),
-});
+import { userSummarySchema } from '@/shared/api/schemas/userSummary.schema';
 
 export const userSchema = userSummarySchema.extend({
   name: z.string().nullable(),
@@ -14,9 +7,9 @@ export const userSchema = userSummarySchema.extend({
   bio: z.string().nullable(),
   followers: z.number(),
   following: z.number(),
-  email: z.string().email().nullable(),
+  email: z.union([z.string().email(), z.literal(''), z.null()]),
   public_repos: z.number(),
-  create_at: z
+  created_at: z
     .string()
     .datetime()
     .transform((s) => new Date(s)),

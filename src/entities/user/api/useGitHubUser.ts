@@ -6,5 +6,6 @@ export function useGitHubUser(username: string) {
   return useQuery({
     queryKey: ['user', username],
     queryFn: () => apiFetch(`/users/${username}`, userSchema),
+    enabled: username.trim().length > 0,
   });
 }

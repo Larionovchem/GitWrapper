@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { userSummarySchema } from '@/entities/user/api/user.schema';
+import { userSummarySchema } from '@/shared/api/schemas/userSummary.schema';
 
 const eventActorSchema = z.object({
   id: z.number(),
@@ -22,8 +22,7 @@ const baseRepoSchema = z.object({
     .transform((s) => new Date(s)),
 });
 
-const pushEventSchema = z.object({
-  ...baseRepoSchema,
+const pushEventSchema = baseRepoSchema.extend({
   type: z.literal('PushEvent'),
   payload: z.object({
     repository_id: z.number(),
@@ -31,8 +30,7 @@ const pushEventSchema = z.object({
     ref: z.string(),
   }),
 });
-const createEventSchema = z.object({
-  ...baseRepoSchema,
+const createEventSchema = baseRepoSchema.extend({
   type: z.literal('CreateEvent'),
   payload: z.object({
     ref_type: z.enum(['branch', 'tag', 'repository']),
@@ -41,8 +39,7 @@ const createEventSchema = z.object({
     ref: z.string().nullable(),
   }),
 });
-const pullRequestSchema = z.object({
-  ...baseRepoSchema,
+const pullRequestSchema = baseRepoSchema.extend({
   type: z.literal('PullRequestEvent'),
   payload: z.object({
     action: z.enum([
@@ -63,12 +60,11 @@ const pullRequestSchema = z.object({
   }),
 });
 
-const issuesSchema = z.object({
-  ...baseRepoSchema,
+const issuesSchema = baseRepoSchema.extend({
   type: z.literal('IssuesEvent'),
   payload: z.object({
     action: z.enum(['opened', 'closed', 'reopened']),
-    issues: z.object({
+    issue: z.object({
       id: z.number(),
       title: z.string(),
       user: userSummarySchema,
@@ -81,12 +77,11 @@ const issuesSchema = z.object({
         .datetime()
         .transform((s) => new Date(s)),
     }),
-    state: z.enum(['opened', 'closed']),
+    state: z.enum(['open', 'closed']),
   }),
 });
 
-const issuesCommentSchema = z.object({
-  ...baseRepoSchema,
+const issuesCommentSchema = baseRepoSchema.extend({
   type: z.literal('IssueCommentEvent'),
   payload: z.object({
     action: z.string(),
@@ -107,51 +102,53 @@ const issuesCommentSchema = z.object({
   }),
 });
 
-const pullRequestReviewEvent = z.object({
-  ...baseRepoSchema,
+const pullRequestReviewEvent = baseRepoSchema.extend({
   type: z.literal('PullRequestReviewEvent'),
-  action: z.string(),
-  pull_request: z.object({
-    url: z.string().url(),
-    id: z.number(),
-    number: z.number(),
-  }),
-  review: z.object({
-    id: z.number(),
-    user: userSummarySchema,
-    html_url: z.string().url(),
-    pull_request_url: z.string().url(),
-    submited_at: z
-      .string()
-      .datetime()
-      .transform((s) => new Date(s)),
-    updated_at: z
-      .string()
-      .datetime()
-      .transform((s) => new Date(s)),
-    commit_id: z.string(),
+  payload: z.object({
+    action: z.string(),
+    pull_request: z.object({
+      url: z.string().url(),
+      id: z.number(),
+      number: z.number(),
+    }),
+    review: z.object({
+      id: z.number(),
+      user: userSummarySchema,
+      html_url: z.string().url(),
+      pull_request_url: z.string().url(),
+      submitted_at: z
+        .string()
+        .datetime()
+        .transform((s) => new Date(s)),
+      updated_at: z
+        .string()
+        .datetime()
+        .transform((s) => new Date(s)),
+      commit_id: z.string(),
+    }),
   }),
 });
 
-const pullRequestReviewCommentEvent = z.object({
-  ...baseRepoSchema,
+const pullRequestReviewCommentEvent = baseRepoSchema.extend({
   type: z.literal('PullRequestReviewCommentEvent'),
-  action: z.string(),
-  comment: z.object({
-    html_url: z.string().url(),
-    user: userSummarySchema,
-    created_at: z
-      .string()
-      .datetime()
-      .transform((s) => new Date(s)),
-    updated_at: z
-      .string()
-      .datetime()
-      .transform((s) => new Date(s)),
-    id: z.number(),
-    path: z.string(),
-    pull_request_review_id: z.number(),
-    diff_hunk: z.string(),
+  payload: z.object({
+    action: z.string(),
+    comment: z.object({
+      html_url: z.string().url(),
+      user: userSummarySchema,
+      created_at: z
+        .string()
+        .datetime()
+        .transform((s) => new Date(s)),
+      updated_at: z
+        .string()
+        .datetime()
+        .transform((s) => new Date(s)),
+      id: z.number(),
+      path: z.string(),
+      pull_request_review_id: z.number(),
+      diff_hunk: z.string(),
+    }),
   }),
 });
 export const eventSchema = z.discriminatedUnion('type', [
@@ -167,3 +164,4 @@ export const eventSchema = z.discriminatedUnion('type', [
 export const eventsSchema = z.array(eventSchema);
 
 export type Event = z.infer<typeof eventSchema>;
+export type Events = z.infer<typeof eventsSchema>;
