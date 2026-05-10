@@ -13,7 +13,7 @@ const eventRepoSchema = z.object({
 });
 
 const baseRepoSchema = z.object({
-  id: z.number(),
+  id: z.string(),
   repo: eventRepoSchema,
   actor: eventActorSchema,
   created_at: z
@@ -151,6 +151,14 @@ const pullRequestReviewCommentEvent = baseRepoSchema.extend({
     }),
   }),
 });
+const deleteEventSchema = baseRepoSchema.extend({
+  type: z.literal('DeleteEvent'),
+  payload: z.object({
+    full_ref: z.string(),
+    ref: z.string(),
+  }),
+});
+
 export const eventSchema = z.discriminatedUnion('type', [
   pushEventSchema,
   pullRequestReviewEvent,
@@ -159,6 +167,7 @@ export const eventSchema = z.discriminatedUnion('type', [
   issuesSchema,
   issuesCommentSchema,
   pullRequestReviewCommentEvent,
+  deleteEventSchema,
 ]);
 
 export const eventsSchema = z.array(eventSchema);

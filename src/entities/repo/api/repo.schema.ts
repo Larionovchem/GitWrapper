@@ -20,6 +20,7 @@ export const repoSchema = z.object({
   language: z.string().nullable(),
   watchers_count: z.number(),
   stargazers_count: z.number(),
+  forks_count: z.number(),
   created_at: z
     .string()
     .datetime()
